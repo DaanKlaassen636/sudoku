@@ -31,7 +31,7 @@ function isColumnValid(board: number[][], columnIndex: number): boolean {
 function getSubgridValidCells(
   board: number[][],
   subgridIndex: number,
-  digit: number
+  digit: number,
 ): [number, number][] {
   const validCells: [number, number][] = [];
 
@@ -60,7 +60,7 @@ function randrange(min: number, max: number): number {
 export function generateBoard(): number[][] {
   function generateBoardAttempt(): number[][] | null {
     const board = Array.from({ length: 9 }, () =>
-      Array.from({ length: 9 }, () => 0)
+      Array.from({ length: 9 }, () => 0),
     );
 
     for (let digit = 1; digit <= 9; digit++) {
@@ -90,7 +90,7 @@ export function generateBoard(): number[][] {
 
 export function removeCellsFromBoard(
   board: number[][],
-  numberOfCells: number
+  numberOfCells: number,
 ): void {
   const availableCells = Array.from({ length: 81 }, (_, i) => i);
 
@@ -106,4 +106,71 @@ export function removeCellsFromBoard(
     board[y][x] = 0;
     availableCells.splice(listIndex, 1);
   }
+}
+
+function isSubgridValid(board: number[][], row: number, col: number): boolean {
+  let numbersBitset = 0;
+
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      const value = board[startRow + r][startCol + c];
+      if (value === 0) continue;
+
+      if (numbersBitset & (1 << value)) return false;
+      numbersBitset |= 1 << value;
+    }
+  }
+
+  return true;
+}
+
+export function isMoveValid(
+  board: number[][],
+  row: number,
+  col: number,
+  value: number,
+): boolean {
+  const original = board[row][col];
+  board[row][col] = value;
+
+  const valid =
+    isRowValid(board, row) &&
+    isColumnValid(board, col) &&
+    isSubgridValid(board, row, col);
+
+  board[row][col] = original;
+
+  return valid;
+}
+
+export function isMovegloballyValid(
+  board: number[][],
+  row: number,
+  col: number,
+  value: number,
+): boolean {
+  const original = board[row][col];
+  board[row][col] = value;
+
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cellValue = board[r][c];
+      if (cellValue === 0) continue;
+
+      if (
+        !isRowValid(board, r) ||
+        !isColumnValid(board, c) ||
+        !isSubgridValid(board, r, c)
+      ) {
+        board[row][col] = original;
+        return false;
+      }
+    }
+  }
+
+  board[row][col] = original;
+  return true;
 }
