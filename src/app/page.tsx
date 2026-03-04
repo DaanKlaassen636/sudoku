@@ -2,42 +2,78 @@
 
 import { useEffect, useState } from "react";
 import SudokuGrid from "@/components/sudoku-grid";
-import { generateBoard, isMovegloballyValid, removeCellsFromBoard } from "@/lib/sudoku";
-import { isMoveValid } from "@/lib/sudoku";
+import { generateBoard, isCellValid, removeCellsFromBoard } from "@/lib/sudoku";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
-  const [board, setBoard] = useState<number[][] | null>(null);
+  const [board, setBoard] = useState<number[][]>([]);
+  const [lockedCells, setLockedCells] = useState<boolean[][]>([]);
+  const [lastMove, setLastMove] = useState<[number, number] | null>(null);
   const [errors, setErrors] = useState(0);
+  const [checked, setChecked] = useState(false);
+
+  // game settings
+  const [boardcellsVisible] = useState(40); // remove 40 cells for puzzle
 
   useEffect(() => {
     const newBoard = generateBoard();
-    removeCellsFromBoard(newBoard, 40); // remove 40 cells for puzzle
+    removeCellsFromBoard(newBoard, boardcellsVisible);
     setBoard(newBoard);
-  }, []);
 
-const handleCellChange = (row: number, col: number, value: number) => {
-  if (!board) return;
+    // Initialize lockedCells based on the cells that are non-zero **after removing cells**
+    const newLocked = newBoard.map(row => row.map(cell => cell !== 0));
+    setLockedCells(newLocked);
+  }, [boardcellsVisible]);
 
-  if (!isMovegloballyValid(board, row, col, value)) {
-    // Wrong move, increment error counter
-    setErrors((prev) => prev + 1);
-    return; // Do NOT update the board
+  const handleCellChange = (row: number, col: number, value: number) => {
+    const newBoard = board.map((r) => [...r]);
+    newBoard[row][col] = value;
+    setBoard(newBoard);
+
+    setLastMove([row, col]); // track the last edited cell
+    setChecked(false); // reset previous check
+  };
+
+  // Button handler to check the whole board
+  const handleCheckBoard = () => {
+    let errorCount = 0;
+
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+     if (
+        !lockedCells[row][col] &&
+        board[row][col] !== 0 &&
+        !isCellValid(board, row, col)
+      ) {
+        errorCount++;
+      }
+    }
   }
+    setErrors(errorCount);
+    setChecked(true);
+  };
 
-  // Valid move, update board
-  const newBoard = board.map((r) => [...r]);
-  newBoard[row][col] = value;
-  setBoard(newBoard);
-};
-
-  if (!board) return <div>Loading Sudoku...</div>;
+  if (!board.length) return <div>Loading Sudoku...</div>;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Sudoku</h1>
       <div className="text-red-600 mb-2">Errors: {errors}</div>
-      {/* TODO: pass board into SudokuGrid and cells */}
-      <SudokuGrid board={board} onCellChange={handleCellChange} />
+
+      <SudokuGrid
+        board={board}
+        lockedCells={lockedCells}
+        lastMove={lastMove}
+        checked={checked}
+        onCellChange={handleCellChange}
+      />
+
+      <Button
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        onClick={handleCheckBoard}
+      >
+        Check Board
+      </Button>
     </div>
   );
 }

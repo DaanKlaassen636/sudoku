@@ -47,7 +47,7 @@ function getSubgridValidCells(
       validCells.push([x, y]);
     }
 
-    board[y][x] = 0; // reset
+    board[y][x] = 0;
   }
 
   return validCells;
@@ -108,69 +108,84 @@ export function removeCellsFromBoard(
   }
 }
 
-function isSubgridValid(board: number[][], row: number, col: number): boolean {
-  let numbersBitset = 0;
+export function isCellValid(
+  board: number[][],
+  row: number,
+  col: number,
+): boolean {
+  const value = board[row][col];
+  if (value === 0) return true;
 
+  // Check row
+  for (let c = 0; c < 9; c++) {
+    if (c !== col && board[row][c] === value) {
+      return false;
+    }
+  }
+
+  // Check column
+  for (let r = 0; r < 9; r++) {
+    if (r !== row && board[r][col] === value) {
+      return false;
+    }
+  }
+
+  // Check subgrid
   const startRow = Math.floor(row / 3) * 3;
   const startCol = Math.floor(col / 3) * 3;
 
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < 3; c++) {
-      const value = board[startRow + r][startCol + c];
-      if (value === 0) continue;
-
-      if (numbersBitset & (1 << value)) return false;
-      numbersBitset |= 1 << value;
-    }
-  }
-
-  return true;
-}
-
-export function isMoveValid(
-  board: number[][],
-  row: number,
-  col: number,
-  value: number,
-): boolean {
-  const original = board[row][col];
-  board[row][col] = value;
-
-  const valid =
-    isRowValid(board, row) &&
-    isColumnValid(board, col) &&
-    isSubgridValid(board, row, col);
-
-  board[row][col] = original;
-
-  return valid;
-}
-
-export function isMovegloballyValid(
-  board: number[][],
-  row: number,
-  col: number,
-  value: number,
-): boolean {
-  const original = board[row][col];
-  board[row][col] = value;
-
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      const cellValue = board[r][c];
-      if (cellValue === 0) continue;
+      const currentRow = startRow + r;
+      const currentCol = startCol + c;
 
       if (
-        !isRowValid(board, r) ||
-        !isColumnValid(board, c) ||
-        !isSubgridValid(board, r, c)
+        (currentRow !== row || currentCol !== col) &&
+        board[currentRow][currentCol] === value
       ) {
-        board[row][col] = original;
         return false;
       }
     }
   }
 
-  board[row][col] = original;
   return true;
+}
+
+// Returns true if the board can be solved
+export function solveSudoku(board: number[][]): boolean {
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (board[row][col] === 0) {
+        // only when there’s an empty cell
+        for (let num = 1; num <= 9; num++) {
+          if (isCellValid(board, row, col)) {
+            board[row][col] = num;
+            if (solveSudoku(board)) return true;
+            board[row][col] = 0;
+          }
+        }
+        return false; // no number works here
+      }
+    }
+  }
+  return true; // filled completely
+}
+
+export function isMoveGloballyValid(
+  board: number[][],
+  row: number,
+  col: number,
+  value: number,
+): boolean {
+  // if the cell is still empty, don’t try to solve the whole puzzle
+  if (value === 0) {
+    // return true/false depending on your UI logic – here we return false
+    // to indicate “no move made, nothing to validate”
+    return false;
+  }
+
+  const boardCopy = board.map((r) => [...r]);
+  boardCopy[row][col] = value;
+
+  return solveSudoku(boardCopy);
 }
