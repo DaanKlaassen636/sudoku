@@ -12,7 +12,13 @@ interface Props {
   lockedCells: boolean[][];
 }
 
-const SudokuSubgrid = ({ index, board, checked, onCellChange, lockedCells }: Props) => {
+const SudokuSubgrid = ({
+  index,
+  board,
+  checked,
+  onCellChange,
+  lockedCells,
+}: Props) => {
   return (
     <div className="grid grid-cols-3 grid-rows-3 border border-gray-500">
       {Array.from({ length: 9 }).map((_, cellIndex) => {
@@ -28,18 +34,14 @@ const SudokuSubgrid = ({ index, board, checked, onCellChange, lockedCells }: Pro
             col={x}
             onChange={(v) => onCellChange(y, x, v)}
             board={board}
-            locked={lockedCells[y][x]} 
+            locked={lockedCells[y][x]}
             isError={
               checked &&
               !lockedCells[y][x] &&
               board[y][x] !== 0 &&
               !isCellValid(board, y, x)
             }
-            isCorrect={
-              checked &&
-              board[y][x] !== 0 &&
-              isCellValid(board, y, x)
-            }
+            isCorrect={checked && board[y][x] !== 0 && isCellValid(board, y, x)}
           />
         );
       })}

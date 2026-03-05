@@ -67,12 +67,12 @@ const SudokuCell = ({ value, onChange, isError, isCorrect, locked }: Props) => {
         locked
           ? "bg-gray-100 font-bold cursor-default"
           : isError
-          ? "border-red-500 text-red-600"
-          : isCorrect
-          ? "border-green-500 text-green-600"
-          : isSelected
-          ? "border-blue-500"
-          : "border-gray-300"
+            ? "border-red-500 text-red-600"
+            : isCorrect
+              ? "border-green-500 text-green-600"
+              : isSelected
+                ? "border-blue-500"
+                : "border-gray-300",
       )}
     >
       {value !== 0 ? value : ""}

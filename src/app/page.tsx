@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import SudokuGrid from "@/components/sudoku-grid";
 import { generateBoard, isCellValid, removeCellsFromBoard } from "@/lib/sudoku";
 import { Button } from "@/components/ui/button";
+import StartDialog from "@/components/start-dialog";
 
 export default function Page() {
   const [board, setBoard] = useState<number[][]>([]);
@@ -14,16 +15,23 @@ export default function Page() {
 
   // game settings
   const [boardcellsVisible] = useState(40); // remove 40 cells for puzzle
-
-  useEffect(() => {
+  
+  const startGame = useCallback(() => {
     const newBoard = generateBoard();
     removeCellsFromBoard(newBoard, boardcellsVisible);
     setBoard(newBoard);
 
-    // Initialize lockedCells based on the cells that are non-zero **after removing cells**
-    const newLocked = newBoard.map(row => row.map(cell => cell !== 0));
+    const newLocked = newBoard.map((row) => row.map((cell) => cell !== 0));
     setLockedCells(newLocked);
+
+    setErrors(0);
+    setChecked(false);
+    setLastMove(null);
   }, [boardcellsVisible]);
+
+  useEffect(() => {
+    startGame();
+  }, [startGame]);
 
   const handleCellChange = (row: number, col: number, value: number) => {
     const newBoard = board.map((r) => [...r]);
@@ -40,15 +48,15 @@ export default function Page() {
 
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
-     if (
-        !lockedCells[row][col] &&
-        board[row][col] !== 0 &&
-        !isCellValid(board, row, col)
-      ) {
-        errorCount++;
+        if (
+          !lockedCells[row][col] &&
+          board[row][col] !== 0 &&
+          !isCellValid(board, row, col)
+        ) {
+          errorCount++;
+        }
       }
     }
-  }
     setErrors(errorCount);
     setChecked(true);
   };
@@ -56,24 +64,28 @@ export default function Page() {
   if (!board.length) return <div>Loading Sudoku...</div>;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Sudoku</h1>
-      <div className="text-red-600 mb-2">Errors: {errors}</div>
+    <>
+      <StartDialog onStartGame={startGame} />
 
-      <SudokuGrid
-        board={board}
-        lockedCells={lockedCells}
-        lastMove={lastMove}
-        checked={checked}
-        onCellChange={handleCellChange}
-      />
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold mb-4">Sudoku</h1>
+        <div className="text-red-600 mb-2">Errors: {errors}</div>
 
-      <Button
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        onClick={handleCheckBoard}
-      >
-        Check Board
-      </Button>
-    </div>
+        <SudokuGrid
+          board={board}
+          lockedCells={lockedCells}
+          lastMove={lastMove}
+          checked={checked}
+          onCellChange={handleCellChange}
+        />
+
+        <Button
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={handleCheckBoard}
+        >
+          Check Board
+        </Button>
+      </div>
+    </>
   );
 }
