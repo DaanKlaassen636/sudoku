@@ -5,6 +5,7 @@ import SudokuGrid from "@/components/sudoku-grid";
 import { generateBoard, isCellValid, removeCellsFromBoard } from "@/lib/sudoku";
 import { Button } from "@/components/ui/button";
 import StartDialog from "@/components/start-dialog";
+import GameCompleteDialog from "@/components/end-dialog";
 
 export default function Page() {
   const [board, setBoard] = useState<number[][]>([]);
@@ -12,6 +13,7 @@ export default function Page() {
   const [lastMove, setLastMove] = useState<[number, number] | null>(null);
   const [errors, setErrors] = useState(0);
   const [checked, setChecked] = useState(false);
+  const [gameComplete, setGameComplete] = useState(false);
 
   // game settings
   const [boardcellsVisible] = useState(40); // remove 40 cells for puzzle
@@ -36,10 +38,14 @@ export default function Page() {
   const handleCellChange = (row: number, col: number, value: number) => {
     const newBoard = board.map((r) => [...r]);
     newBoard[row][col] = value;
-    setBoard(newBoard);
 
-    setLastMove([row, col]); // track the last edited cell
-    setChecked(false); // reset previous check
+    setBoard(newBoard);
+    setLastMove([row, col]);
+    setChecked(false);
+
+    if (isBoardComplete(newBoard)) {
+      setGameComplete(true);
+    }
   };
 
   // Button handler to check the whole board
@@ -60,6 +66,16 @@ export default function Page() {
     setErrors(errorCount);
     setChecked(true);
   };
+
+  const isBoardComplete = (board: number[][]) => {
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (board[row][col] === 0) return false;
+      if (!isCellValid(board, row, col)) return false;
+    }
+  }
+  return true;
+};
 
   if (!board.length) return <div>Loading Sudoku...</div>;
 
@@ -85,6 +101,14 @@ export default function Page() {
         >
           Check Board
         </Button>
+
+        <GameCompleteDialog
+          open={gameComplete}
+          onNewGame={() => {
+            setGameComplete(false);
+            startGame();
+          }}
+        />
       </div>
     </>
   );

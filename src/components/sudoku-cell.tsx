@@ -63,7 +63,7 @@ const SudokuCell = ({ value, onChange, isError, isCorrect, locked }: Props) => {
       onKeyDown={handleInput}
       className={cn(
         "w-full h-full border flex items-center justify-center cursor-pointer",
-        "text-2xl select-none",
+        "text-3xl select-none font-bold",
         locked
           ? "bg-gray-100 font-bold cursor-default"
           : isError

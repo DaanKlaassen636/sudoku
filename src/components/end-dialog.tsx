@@ -7,13 +7,19 @@ import {
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { DialogClose } from "./animate-ui/primitives/radix/dialog";
 
-export default function StartDialog({ onStartGame }: { onStartGame: () => void }) {  return (
-    <Dialog open={true}>
+export default function GameCompleteDialog({
+  open,
+  onNewGame,
+}: {
+  open: boolean;
+  onNewGame: () => void;
+}) {
+  return (
+    <Dialog open={open}>
       <DialogContent className="flex flex-col items-center justify-center rounded-2xl max-w-md">
         <DialogHeader className="flex flex-col items-center gap-6">
-          <DialogTitle className="sr-only">Sudoku</DialogTitle>
+          <DialogTitle className="sr-only">Puzzle Complete</DialogTitle>
 
           <Image
             src="/sudoku-logo.png"
@@ -23,31 +29,26 @@ export default function StartDialog({ onStartGame }: { onStartGame: () => void }
             priority
             className="pointer-events-none select-none"
           />
+
+          <p className="text-2xl font-bold text-center">
+            Puzzle Complete!
+          </p>
         </DialogHeader>
 
         <div className="flex flex-col gap-5 mt-6 w-full items-center">
-          <DialogClose asChild>
-            <Button
-              variant="outline"
-              className="w-64 h-14 text-lg rounded-2xl shadow-md"
-              onClick={onStartGame} 
-            >
-              New game
-            </Button>
-          </DialogClose>
-
           <Button
             variant="outline"
             className="w-64 h-14 text-lg rounded-2xl shadow-md"
+            onClick={onNewGame}
           >
-            Settings
+            New Game
           </Button>
 
           <Button
             variant="outline"
             className="w-64 h-14 text-lg rounded-2xl shadow-md"
           >
-            Gamerules
+            Main Menu
           </Button>
         </div>
       </DialogContent>
