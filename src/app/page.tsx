@@ -17,7 +17,7 @@ export default function Page() {
 
   // game settings
   const [boardcellsVisible] = useState(40); // remove 40 cells for puzzle
-  
+
   const startGame = useCallback(() => {
     const newBoard = generateBoard();
     removeCellsFromBoard(newBoard, boardcellsVisible);
@@ -68,14 +68,14 @@ export default function Page() {
   };
 
   const isBoardComplete = (board: number[][]) => {
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
-      if (board[row][col] === 0) return false;
-      if (!isCellValid(board, row, col)) return false;
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === 0) return false;
+        if (!isCellValid(board, row, col)) return false;
+      }
     }
-  }
-  return true;
-};
+    return true;
+  };
 
   if (!board.length) return <div>Loading Sudoku...</div>;
 

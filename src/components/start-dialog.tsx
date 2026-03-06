@@ -8,49 +8,71 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "./animate-ui/primitives/radix/dialog";
+import GamerulesDialog from "@/components/gamerules-dialog";
+import React from "react";
 
-export default function StartDialog({ onStartGame }: { onStartGame: () => void }) {  return (
-    <Dialog open={true}>
-      <DialogContent className="flex flex-col items-center justify-center rounded-2xl max-w-md">
-        <DialogHeader className="flex flex-col items-center gap-6">
-          <DialogTitle className="sr-only">Sudoku</DialogTitle>
+export default function StartDialog({
+  onStartGame,
+}: {
+  onStartGame: () => void;
+}) {
+  //game rules dialog state
+  const [showGamerules, setShowGamerules] = React.useState(false);
 
-          <Image
-            src="/sudoku-logo.png"
-            alt="Sudoku Logo"
-            width={300}
-            height={200}
-            priority
-            className="pointer-events-none select-none"
-          />
-        </DialogHeader>
+  const handleGamerules = () => {
+    setShowGamerules(!showGamerules);
+  };
 
-        <div className="flex flex-col gap-5 mt-6 w-full items-center">
-          <DialogClose asChild>
+  return (
+    <>
+      {showGamerules && (
+        <GamerulesDialog
+          showGamerules={showGamerules}
+          handleGamerules={handleGamerules}
+        />
+      )}
+
+      <Dialog open={true}>
+        <DialogContent className="flex flex-col items-center justify-center rounded-2xl max-w-md">
+          <DialogHeader className="flex flex-col items-center gap-6">
+            <DialogTitle className="sr-only">Sudoku</DialogTitle>
+
+            <Image
+              src="/sudoku-logo.png"
+              alt="Sudoku Logo"
+              width={300}
+              height={200}
+              priority
+              className="pointer-events-none select-none"
+            />
+          </DialogHeader>
+
+          <div className="flex flex-col gap-5 mt-6 w-full items-center">
+            <DialogClose asChild>
+              <Button
+                variant="outline"
+                className="w-64 h-14 text-lg rounded-2xl shadow-md"
+                onClick={onStartGame}
+              >
+                New game
+              </Button>
+            </DialogClose>
             <Button
               variant="outline"
               className="w-64 h-14 text-lg rounded-2xl shadow-md"
-              onClick={onStartGame} 
+              onClick={handleGamerules}
             >
-              New game
+              Gamerules
             </Button>
-          </DialogClose>
-
-          <Button
-            variant="outline"
-            className="w-64 h-14 text-lg rounded-2xl shadow-md"
-          >
-            Settings
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-64 h-14 text-lg rounded-2xl shadow-md"
-          >
-            Gamerules
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <Button
+              variant="outline"
+              className="w-64 h-14 text-lg rounded-2xl shadow-md"
+            >
+              Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

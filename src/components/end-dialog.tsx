@@ -30,9 +30,7 @@ export default function GameCompleteDialog({
             className="pointer-events-none select-none"
           />
 
-          <p className="text-2xl font-bold text-center">
-            Puzzle Complete!
-          </p>
+          <p className="text-2xl font-bold text-center">Puzzle Complete!</p>
         </DialogHeader>
 
         <div className="flex flex-col gap-5 mt-6 w-full items-center">
